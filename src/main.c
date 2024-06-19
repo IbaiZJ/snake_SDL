@@ -6,6 +6,7 @@ int main(int argc, char** argv) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
+    
 
     SDL_Window* window = SDL_CreateWindow("SDL Tutorial", 
                                           SDL_WINDOWPOS_UNDEFINED, 
