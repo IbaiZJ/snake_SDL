@@ -1,31 +1,27 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include "SDL.h"
 
-int main(int argc, char** argv) {
+#include "window.h"
+
+int mainn(int argc, char** argv) {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
     
-
-    SDL_Window* window = SDL_CreateWindow("SDL Tutorial", 
-                                          SDL_WINDOWPOS_UNDEFINED, 
-                                          SDL_WINDOWPOS_UNDEFINED, 
-                                          640, 480, 
-                                          SDL_WINDOW_SHOWN);
-
-
-
-    if (window == NULL) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        SDL_Quit();
+    if(createWindow()) {
         return 1;
     }
 
-    SDL_Delay(1000);
+    createRender();
 
-    SDL_DestroyWindow(window);
-    SDL_Quit();
+    
+    
+
+    SDL_Delay(5000);
+
+    
+    destroyWindow();
     
     return 0;
-}
+}*/

@@ -1,2 +1,10 @@
+C_FILES = src/*.c
+BIN = bin/snake
+
+INCLUDES = -I/usr/include/SDL2
+INCLUDES_L = -L/usr/lib
+FLAGS = -lSDL2
+
+
 all:
-	gcc -o bin/snake src/*.c -I/usr/include/SDL2 -L/usr/lib -lSDL2
+	gcc -o $(BIN) $(C_FILES) $(INCLUDES) $(INCLUDES_L) $(FLAGS)
