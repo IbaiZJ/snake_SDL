@@ -22,19 +22,7 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    SDL_Surface* screenSurface = SDL_GetWindowSurface(window);
-    SDL_FillRect(screenSurface, NULL, SDL_MapRGB(screenSurface->format, 0xFF, 0xFF, 0xFF));
-    SDL_UpdateWindowSurface(window);
-
-    int quit = 0;
-    SDL_Event e;
-    while (!quit) {
-        while (SDL_PollEvent(&e) != 0) {
-            if (e.type == SDL_QUIT) {
-                quit = 1;
-            }
-        }
-    }
+    SDL_Delay(1000);
 
     SDL_DestroyWindow(window);
     SDL_Quit();
