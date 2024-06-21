@@ -31,7 +31,81 @@ SDL_Renderer* renderer;
 SDL_Event event;
 APPLE apple;
 
-int createWindowAndRender() {
+int createWindowAndRender(void);
+void renderBoard(void);
+void renderSnake(SNAKE* snake);
+void renderApple(void);
+void createApple(void);
+void moveSnake(SNAKE* snake);
+SNAKE* initSnake(void);
+void createTale(SNAKE* snake);
+void eatApple(SNAKE* snake);
+
+int main(int argc, char** argv) {
+    if(createWindowAndRender()) return 1;
+
+    srand(time(NULL));
+
+    bool quit = false;
+    SNAKE* snake;
+
+    snake = initSnake();
+    createApple();
+    createTale(snake);
+    createTale(snake);
+    createTale(snake);
+
+    while (!quit) {
+        SDL_RenderClear(renderer);
+
+        while(SDL_PollEvent(&event)) {
+            if(event.type == SDL_QUIT) quit = true;
+            else if(event.type == SDL_KEYDOWN) {
+                switch (event.key.keysym.sym)
+                {
+                case SDLK_ESCAPE:
+                    quit = true;
+                    break;
+                case SDLK_UP:
+                    snake->dir = N;
+                    break;
+                case SDLK_DOWN:
+                    snake->dir = S;
+                    break;
+                case SDLK_LEFT:
+                    snake->dir = W;
+                    break;
+                case SDLK_RIGHT:
+                    snake->dir = E;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+
+        moveSnake(snake);
+        eatApple(snake);
+
+        renderBoard();
+        renderSnake(snake);
+        renderApple();
+
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+        SDL_RenderPresent(renderer);
+
+        SDL_Delay(200);
+    }
+
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_Quit();
+    
+    return 0;
+}
+
+int createWindowAndRender(void) {
     if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
@@ -96,7 +170,7 @@ void renderSnake(SNAKE* snake) {
     return;
 }
 
-void renderApple() {
+void renderApple(void) {
     SDL_Rect rect = {apple.x * SQUARE_DIM, apple.y * SQUARE_DIM, SQUARE_DIM, SQUARE_DIM};
 
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
@@ -105,22 +179,18 @@ void renderApple() {
     return;
 }
 
-void createApple() {
+void createApple(void) {
     apple.x = rand() % SQUARE_AMOUNT;
     apple.y = rand() % SQUARE_AMOUNT;
 
     return;
 }
 
-void eatApple(SNAKE* snake) {
-    if(snake->x == apple.x && snake->y == apple.y) {
-        createApple();
-    }
-
-    return;
-}
-
 void moveSnake(SNAKE* snake) {
+    SNAKE* aux = snake->next;
+    int preX = snake->x, preY = snake->y;
+    int auxX, auxY;
+
     switch (snake->dir)
     {
     case N:
@@ -137,10 +207,23 @@ void moveSnake(SNAKE* snake) {
         break;
     }
 
+    while(aux != NULL) {
+        auxX = aux->x;
+        auxY = aux->y;
+
+        aux->x = preX;
+        aux->y = preY;
+
+        preX = auxX;
+        preY = auxY;
+
+        aux = aux->next;
+    }
+
     return;
 }
 
-SNAKE* initSnake() {
+SNAKE* initSnake(void) {
     SNAKE* snake;
 
     snake = (SNAKE*)malloc(sizeof(SNAKE));
@@ -154,69 +237,27 @@ SNAKE* initSnake() {
 }
 
 void createTale(SNAKE* snake) {
-    SNAKE* aux = snake;
-    
+    SNAKE* new, *aux = snake;
+
+    while(aux->next != NULL) aux = aux->next;
+
+    new = (SNAKE*)malloc(sizeof(SNAKE));
+    new->x = aux->x;
+    new->y = aux->y;
+
+    new->next = NULL;
+
+    aux->next = new;
 
     return;
 }
 
-int main(int argc, char** argv) {
-    if(createWindowAndRender()) return 1;
-
-    srand(time(NULL));
-
-    bool quit = false;
-    SNAKE* snake;
-
-    snake = initSnake();
-    createApple();
-
-    while (!quit) {
-        SDL_RenderClear(renderer);
-
-        while(SDL_PollEvent(&event)) {
-            if(event.type == SDL_QUIT) quit = true;
-            else if(event.type == SDL_KEYDOWN) {
-                switch (event.key.keysym.sym)
-                {
-                case SDLK_ESCAPE:
-                    quit = true;
-                    break;
-                case SDLK_UP:
-                    snake->dir = N;
-                    break;
-                case SDLK_DOWN:
-                    snake->dir = S;
-                    break;
-                case SDLK_LEFT:
-                    snake->dir = W;
-                    break;
-                case SDLK_RIGHT:
-                    snake->dir = E;
-                    break;
-                default:
-                    break;
-                }
-            }
-        }
-
-        moveSnake(snake);
-        eatApple(snake);
-
-        renderBoard();
-        renderSnake(snake);
-        renderApple();
-
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-        SDL_RenderPresent(renderer);
-
-        SDL_Delay(200);
+void eatApple(SNAKE* snake) {
+    if(snake->x == apple.x && snake->y == apple.y) {
+        createApple();
+        createTale(snake);
     }
 
-
-    SDL_DestroyWindow(window);
-    SDL_DestroyRenderer(renderer);
-    SDL_Quit();
-    
-    return 0;
+    return;
 }
+
