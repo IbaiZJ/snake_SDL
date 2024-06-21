@@ -35,11 +35,13 @@ int createWindowAndRender(void);
 void renderBoard(void);
 void renderSnake(SNAKE* snake);
 void renderApple(void);
-void createApple(void);
+void createApple(SNAKE* snake);
 void moveSnake(SNAKE* snake);
 SNAKE* initSnake(void);
 void createTale(SNAKE* snake);
 void eatApple(SNAKE* snake);
+void tailCollision(SNAKE* snake);
+void resetGame(SNAKE* snake);
 
 int main(int argc, char** argv) {
     if(createWindowAndRender()) return 1;
@@ -47,10 +49,12 @@ int main(int argc, char** argv) {
     srand(time(NULL));
 
     bool quit = false;
-    SNAKE* snake;
+    SNAKE* snake = NULL;
+
+    // resetGame(snake);
 
     snake = initSnake();
-    createApple();
+    createApple(snake);
     createTale(snake);
     createTale(snake);
     createTale(snake);
@@ -86,6 +90,7 @@ int main(int argc, char** argv) {
 
         moveSnake(snake);
         eatApple(snake);
+        tailCollision(snake);
 
         renderBoard();
         renderSnake(snake);
@@ -179,9 +184,24 @@ void renderApple(void) {
     return;
 }
 
-void createApple(void) {
-    apple.x = rand() % SQUARE_AMOUNT;
-    apple.y = rand() % SQUARE_AMOUNT;
+void createApple(SNAKE* snake) {
+    SNAKE* aux;
+    bool quit = false;
+
+    do {
+        aux = snake;
+        quit = true;
+
+        apple.x = rand() % SQUARE_AMOUNT;
+        apple.y = rand() % SQUARE_AMOUNT;
+
+        while(aux != NULL && quit == true) {
+            if(aux->x == apple.x && aux->y == apple.y) {
+                quit = false;
+            }
+            aux = aux->next;
+        }
+    } while(!quit);
 
     return;
 }
@@ -254,10 +274,43 @@ void createTale(SNAKE* snake) {
 
 void eatApple(SNAKE* snake) {
     if(snake->x == apple.x && snake->y == apple.y) {
-        createApple();
+        createApple(snake);
         createTale(snake);
     }
 
     return;
 }
 
+void tailCollision(SNAKE* snake) {
+    SNAKE* aux = snake;
+
+    aux = aux->next;
+
+    while(aux != NULL) {
+        
+        if(aux->x == snake->x && aux->y == snake->y) {
+            resetGame(snake);
+        }
+
+        aux = aux->next;
+    }
+
+    return;
+}
+
+void resetGame(SNAKE* snake) {
+    SNAKE* aux = snake;
+    SNAKE* temp;
+
+    while(aux != NULL) {
+        temp = aux;
+        aux = aux->next;
+        free(temp);
+    }
+
+    snake = initSnake();
+    createApple(snake);
+    createTale(snake);
+    createTale(snake);
+    createTale(snake);
+}
